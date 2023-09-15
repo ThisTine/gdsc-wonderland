@@ -1,5 +1,6 @@
 import {Box, Center, Heading, Image, VStack} from "@chakra-ui/react";
 import {useEffect, useLayoutEffect, useState} from "react";
+// @ts-ignore
 import seedRandom from 'seedrandom'
 
 const pictures = [
@@ -21,10 +22,9 @@ const pictures = [
 ]
 
 
-
 const GameButton = ({pic, onClick}: { pic: string, onClick: () => void}) => {
 	return(
-		<Box onClick={onClick} mt={5} cursor="pointer" _hover={{transform:"scale(1.1)"}} transition={"all 0.1s"} p={3} bg={"white"} shadow={"md"} rounded={"xl"} >
+		<Box display={"flex"} justifyContent={"center"} alignItems={"center"} w={"350px"} height={"350px"} overflow={"hidden"} onClick={onClick} mt={5} cursor="pointer" _hover={{transform:"scale(1.1)"}} transition={"all 0.1s"} p={3} bg={"white"} shadow={"md"} rounded={"xl"} >
 			<Image maxW={"300px"} src={pic}/>
 		</Box>
 	)
@@ -38,7 +38,7 @@ export const Game = ({token}:{token:string}) => {
 		const timer = setInterval(()=>{
 			setPic(pictures[Math.floor(rnd()*pictures.length)])
 		}
-		,500)
+		,200)
 		return ()=>clearInterval(timer)
 	},[rnd])
 	useEffect(()=>{
