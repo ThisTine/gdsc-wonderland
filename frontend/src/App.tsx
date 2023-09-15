@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {
+    Box,
+    Button,
+    Center,
+    Container,
+    Modal, ModalBody, ModalCloseButton,
+    ModalContent, ModalFooter,
+    ModalHeader,
+    ModalOverlay, Text, useDisclosure,
+} from "@chakra-ui/react";
+import {Game} from "./Game.tsx";
+import {NavBar} from "./Component/NavBar.tsx";
 
 function App() {
-  const [count, setCount] = useState(0)
+    const {isOpen,onClose, onOpen} = useDisclosure()
+    return (
+        <>
+        <Modal isOpen={isOpen} onClose={onClose} isCentered>
+            <ModalOverlay />
+            <ModalContent >
+                <ModalHeader>GDSC KMUTT (ชมรมคนหาทำ) !!</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                    <Text>
+                        GDSC (Google developer student clubs) เป็นโครงการที่มุ่งเน้นการสร้าง community ระหว่าง developer ภายในมหาลัยทั่วโลก 🌍 โดยมี "Google" บริษัทชั้นนำของโลกเป็นผู้สนับสนุน โดยจุดมุ่งหมายของเราคือการสร้างพื้นที่ เพื่อให้เหล่านักศึกษาภายในมหาลัยที่สนใจในด้านการพัฒนาเทคโนโลยี ได้เข้าพบปะ พูดคุย แลกเปลี่ยนความรู้ จนถึงการนำความรู้ไปประยุกต์ใช้ร่วมกันเพื่อก่อเกิดวัตกรรมใหม่ ๆ ให้กับชุมชน ✨
+                    </Text>
+                    <Text mt={5}>
+                        โดยเกมนี้คาดหวังให้เราได้คุยกับเพื่อน ๆ ใหม่ ๆ และได้ลองทำกิจกรรมร่วมกัน !
+                    </Text>
+                </ModalBody>
+                <ModalFooter/>
+            </ModalContent>
+        </Modal>
+        <Box minW={"100vw"} minH={"100vh"}>
+            <NavBar/>
+            <Center>
+                <Container maxW={"container.xl"}>
+                    <Game/>
+                </Container>
+            </Center>
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+            <Button onClick={onOpen} pos={"fixed"} colorScheme={"blue"} rounded={"full"} bottom={5} right={3}>What is GDSC ?</Button>
+
+        </Box>
+
+        </>
+    );
 }
 
 export default App
