@@ -1,9 +1,11 @@
 package fiber
 
 import (
-	"densomap-backend/types/response"
 	"fmt"
+
 	"github.com/gofiber/fiber/v2"
+
+	"backend/types/response"
 )
 
 func NotFoundHandler(c *fiber.Ctx) error {

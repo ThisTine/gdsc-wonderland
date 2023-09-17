@@ -1,44 +1,50 @@
 package fiber
 
 import (
-	"densomap-backend/types/response"
+	"errors"
+	"strings"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"strings"
+
+	"backend/types/response"
 )
 
 func ErrorHandler(c *fiber.Ctx, err error) error {
 	// Case of *fiber.Error
-	if e, ok := err.(*fiber.Error); ok {
-		return c.Status(e.Code).JSON(response.ErrorResponse{
+	var fiberErr *fiber.Error
+	if errors.As(err, &fiberErr) {
+		return c.Status(fiberErr.Code).JSON(response.ErrorResponse{
 			Success: false,
-			Code:    strings.ReplaceAll(strings.ToUpper(e.Error()), " ", "_"),
-			Message: e.Error(),
-			Error:   e.Error(),
+			Code:    strings.ReplaceAll(strings.ToUpper(fiberErr.Error()), " ", "_"),
+			Message: fiberErr.Error(),
+			Error:   fiberErr.Error(),
 		})
 	}
 
 	// Case of ErrorInstance
-	if e, ok := err.(*response.ErrorInstance); ok {
-		if e.Err != nil {
+	var respErr *response.ErrorInstance
+	if errors.As(err, &fiberErr) {
+		if respErr.Err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(&response.ErrorResponse{
 				Success: false,
-				Code:    e.Code,
-				Message: e.Message,
-				Error:   e.Err.Error(),
+				Code:    respErr.Code,
+				Message: respErr.Message,
+				Error:   respErr.Err.Error(),
 			})
 		}
 		return c.Status(fiber.StatusBadRequest).JSON(&response.ErrorResponse{
 			Success: false,
-			Message: e.Message,
-			Code:    e.Code,
+			Message: respErr.Message,
+			Code:    respErr.Code,
 		})
 	}
 
 	// Case of validator.ValidationErrors
-	if e, ok := err.(validator.ValidationErrors); ok {
+	var valErr validator.ValidationErrors
+	if errors.As(err, &valErr) {
 		var lists []string
-		for _, err := range e {
+		for _, err := range valErr {
 			lists = append(lists, err.Field()+" ("+err.Tag()+")")
 		}
 
@@ -48,13 +54,13 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 			Success: false,
 			Code:    "VALIDATION_FAILED",
 			Message: "VALIDATION failed on field " + message,
-			Error:   e.Error(),
+			Error:   valErr.Error(),
 		})
 	}
 
 	return c.Status(fiber.StatusInternalServerError).JSON(&response.ErrorResponse{
 		Success: false,
-		Code:    "UNKNOWN_SERVER_SIDE_ERROR",
+		Code:    "SERVER_SIDE_ERROR",
 		Message: "Unknown server side error",
 		Error:   err.Error(),
 	})

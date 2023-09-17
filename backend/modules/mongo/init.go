@@ -10,14 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	mod "backend/modules"
-	"backend/types/module"
 )
 
-func Init(conf *module.Config) {
+func Init() {
 	// Setup command monitor
 	monitor := &event.CommandMonitor{
 		Started: (func() func(_ context.Context, evt *event.CommandStartedEvent) {
-			if conf.LogLevel == 6 {
+			if mod.Conf.LogLevel == 6 {
 				return func(_ context.Context, evt *event.CommandStartedEvent) {
 					logrus.WithField("command", evt.Command.String()).Trace("MONGO COMMAND STARTED")
 				}
@@ -31,8 +30,8 @@ func Init(conf *module.Config) {
 		&mgm.Config{
 			CtxTimeout: 5 * time.Second,
 		},
-		conf.MongoDbName,
-		options.Client().ApplyURI(conf.MongoUrl).SetMonitor(monitor),
+		mod.Conf.MongoDbName,
+		options.Client().ApplyURI(mod.Conf.MongoUrl).SetMonitor(monitor),
 	); err != nil {
 		logrus.WithError(err).Fatal("UNABLE TO CONFIGURATION MGM")
 	}

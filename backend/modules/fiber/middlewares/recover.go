@@ -10,7 +10,6 @@ import (
 var Recover = func() fiber.Handler {
 	if mod.Conf.Environment == 1 {
 		return func(c *fiber.Ctx) error {
-			// defer logrus.Debug("CALL " + c.Method() + " " + c.Path() + " " + string(c.Request().Body()))
 			return c.Next()
 		}
 	}
