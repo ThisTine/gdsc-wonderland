@@ -10,10 +10,14 @@ import (
 
 type PairCommit struct {
 	mh.ModelBase `bson:"_,inline"`
-	SessionNo    *string             `bson:"sessionNo,omitempty"`
+	SessionId    *primitive.ObjectID `bson:"sessionId,omitempty"`
 	ItemNo       *string             `bson:"itemNo,omitempty"`
 	PairedWith   *primitive.ObjectID `bson:"pairedWith,omitempty"`
 }
+
+const PairCommitSessionId = "sessionId"
+const PairCommitItemNo = "itemNo"
+const PairCommitPairedWith = "pairedWith"
 
 func (r *PairCommit) Collection() *mgm.Collection {
 	coll, _ := mh.CreateCollection(mod.Database, "pair_commits")

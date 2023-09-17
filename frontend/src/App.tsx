@@ -17,7 +17,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { Game } from "./Game.tsx";
-import { NavBar } from "./Component/NavBar.tsx";
+import { Navbar } from "./components/Navbar.tsx";
 import { useEffect, useState } from "react";
 import bg from "./assets/bg.jpg";
 
@@ -97,7 +97,7 @@ function App() {
         backgroundSize={"cover"}
         minH={"100vh"}
       >
-        <NavBar />
+        <Navbar />
         <Center>
           <Container maxW={"container.xl"}>
             {hashedToken ? (

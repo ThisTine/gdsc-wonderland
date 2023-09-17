@@ -6,6 +6,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/go-playground/validator/v10 v10.15.4
 	github.com/gofiber/fiber/v2 v2.49.2
+	github.com/jxskiss/base62 v1.1.0
 	github.com/kamva/mgm/v3 v3.5.0
 	github.com/sirupsen/logrus v1.9.3
 	go.mongodb.org/mongo-driver v1.12.1

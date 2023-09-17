@@ -1,43 +1,38 @@
 package procedures
 
 import (
-	"encoding/base64"
-	"strings"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"backend/modules/mng"
 	"backend/types/model"
 	"backend/types/response"
-	"backend/utils/value"
 )
 
-func Paired(sessionNo string, pairedSessionNo string) (forwardUrl *string, pairedWith *string, e error) {
-	// * Generate session hash
-	sessionHash, errr := GenerateSessionHash(sessionNo)
-	if errr != nil {
-		return nil, nil, errr
+func Paired(sessionId primitive.ObjectID, pairedSessionId primitive.ObjectID, commitId primitive.ObjectID, pairedCommitId primitive.ObjectID) (pairedEmail *string, forwardUrl *string, e error) {
+	// * Query session info
+	session := new(model.Session)
+	if err := mng.Session.FindByID(sessionId, session); err != nil {
+		return nil, nil, response.Error(true, "Unable to fetch session", err)
 	}
 
-	// * Decode pair base64 sessionNo
-	decoded, err := base64.StdEncoding.DecodeString(pairedSessionNo)
-	if err != nil {
-		return nil, nil, response.Error(true, "Unable to decode session no", err)
+	// * Query paired session info
+	pairedSession := new(model.Session)
+	if err := mng.Session.FindByID(pairedSessionId, pairedSession); err != nil {
+		return nil, nil, response.Error(true, "Unable to fetch paired session", err)
 	}
 
 	// * Generate forward link
-	forwardLink := GenerateForwardLink(*sessionHash)
+	forwardLink := GenerateForwardLink(*session.Hash)
 
-	// * Log successful pair
-	newPairLog := &model.PairLog{
-		SessionNo: &sessionNo,
-		Action:    value.Ptr("pair"),
-		Attribute: map[string]any{
-			"hash":       sessionHash,
-			"pairedWith": pairedSessionNo,
-		},
+	// * Create match
+	match := &model.PairMatch{
+		CommitA: &commitId,
+		CommitB: &pairedCommitId,
+		Diff:    nil,
 	}
-	if err := mng.PairLog.Create(newPairLog); err != nil {
-		return nil, nil, response.Error(true, "Unable to create pair log", err)
+	if err := mng.PairMatch.Create(match); err != nil {
+		return nil, nil, response.Error(true, "Unable to create pair match", err)
 	}
 
-	return forwardLink, value.Ptr(strings.TrimSpace(string(decoded))), nil
+	return pairedSession.Email, forwardLink, nil
 }

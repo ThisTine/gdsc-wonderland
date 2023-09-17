@@ -7,7 +7,7 @@ import {
   Image,
 } from "@chakra-ui/react";
 
-export const NavBar = () => {
+export const Navbar = () => {
   return (
     <Box w={"100%"} background={"white"} shadow={"md"} py={3}>
       <Center>
@@ -16,7 +16,7 @@ export const NavBar = () => {
             <Image
               w={"80px"}
               src={
-                "https://raw.githubusercontent.com/nimishbongale/DSC-RIT_Recruitment_Test/master/static/dscnew.png?token=AKLHGWOKT4B6YUSLBUNLU526NEMIS"
+                "https://raw.githubusercontent.com/nimishbongale/DSC-RIT_Recruitment_Test/master/static/dscnew.png"
               }
             />
             <Heading color={"black"} size={"md"}>

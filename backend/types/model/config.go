@@ -13,6 +13,8 @@ type Config struct {
 	Secret       *string `bson:"secret,omitempty"`
 }
 
+const ConfigSecret = "secret"
+
 func (r *Config) Collection() *mgm.Collection {
 	coll, exist := mh.CreateCollection(mod.Database, "configs")
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -35,8 +36,8 @@ func CommitPostHandler(c *fiber.Ctx) error {
 	duplicateCommit := new(model.PairCommit)
 	if err := mng.PairCommit.First(
 		bson.M{
-			"sessionNo": body.SessionNo,
-			"createdAt": bson.M{
+			model.PairCommitSessionId: body.SessionId,
+			model.FieldCreatedAt: bson.M{
 				"$gte": duplicateThreshold,
 			},
 		},
@@ -55,7 +56,7 @@ func CommitPostHandler(c *fiber.Ctx) error {
 	if duplicateCommit != nil {
 		// * Create new pair log
 		newPairLog := &model.PairLog{
-			SessionNo: body.SessionNo,
+			SessionId: body.SessionId,
 			Action:    value.Ptr("duplicate"),
 		}
 		if err := mng.PairLog.Create(newPairLog); err != nil {
@@ -63,10 +64,14 @@ func CommitPostHandler(c *fiber.Ctx) error {
 		}
 
 		// * Response
-		return response.Error(false, "Duplicate commit within 5 seconds", nil)
+		diiference := time.Now().Sub(*duplicateCommit.CreatedAt)
+
+		// * Sprintf Duplicate commit within 4.12 seconds
+		message := spew.Sprintf("Duplicate commit within %.2f", diiference.Seconds())
+		return response.Error(false, message, nil)
 	}
 
-	// * Check for existing pair
+	// * Check for parable commit
 	pairThreshold := time.Now().Add(-1 * time.Second)
 	pairCommit := new(model.PairCommit)
 	if err := mng.PairCommit.First(
@@ -99,7 +104,7 @@ func CommitPostHandler(c *fiber.Ctx) error {
 
 	// * Construct new pair commit
 	newCommit := &model.PairCommit{
-		SessionNo:  body.SessionNo,
+		SessionId:  body.SessionId,
 		ItemNo:     body.ItemNo,
 		PairedWith: nil,
 	}
@@ -135,7 +140,7 @@ func CommitPostHandler(c *fiber.Ctx) error {
 		}
 
 		// * Pair commit
-		forwardLink, pairedWith, err := procedures.Paired(*body.SessionNo, *pairCommit.SessionNo)
+		forwardLink, pairedWith, err := procedures.Paired(*body.SessionId, *pairCommit.SessionId, *newCommit.ID, *pairCommit.ID)
 		if err != nil {
 			return err
 		}
@@ -160,7 +165,7 @@ func CommitPostHandler(c *fiber.Ctx) error {
 	}
 
 	// * Pair commit
-	forwardLink, pairedWith, err := procedures.Paired(*body.SessionNo, *pairCommit.SessionNo)
+	forwardLink, pairedWith, err := procedures.Paired(*body.SessionId, *pairCommit.SessionId, *newCommit.ID, *pairCommit.ID)
 	if err != nil {
 		return err
 	}

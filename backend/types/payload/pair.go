@@ -1,8 +1,10 @@
 package payload
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type ParingCommit struct {
-	SessionNo *string `json:"sessionNo" validate:"required"`
-	ItemNo    *string `json:"itemNo" validate:"required"`
+	SessionId *primitive.ObjectID `json:"sessionId" validate:"required"`
+	ItemNo    *string             `json:"itemNo" validate:"required"`
 }
 
 type ParingCommitResponse struct {
