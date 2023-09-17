@@ -1,4 +1,4 @@
-type Success = {
+export type Success = {
     success: boolean,
     data: {
         matched : boolean,
@@ -6,9 +6,9 @@ type Success = {
       }
 };
   
-  type Err = {
+export type Err = {
     success: boolean,
-    code: String,
-    message: String,
-    error: String
+    code: string,
+    message: string,
+    error: string
   };
