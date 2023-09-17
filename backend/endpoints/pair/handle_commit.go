@@ -97,16 +97,17 @@ func CommitPostHandler(c *fiber.Ctx) error {
 		return response.Error(true, "Unable to find pair commit", err)
 	}
 
+	// * Construct new pair commit
+	newCommit := &model.PairCommit{
+		SessionNo:  body.SessionNo,
+		ItemNo:     body.ItemNo,
+		PairedWith: nil,
+	}
+
 	if pairCommit == nil {
 		// # Case of not found matching pair
-		// * Construct adding pair commit
-		newPairCommit := &model.PairCommit{
-			SessionNo:  body.SessionNo,
-			ItemNo:     body.ItemNo,
-			PairedWith: nil,
-		}
-		if err := mng.PairCommit.Create(newPairCommit); err != nil {
-			return response.Error(true, "Unable to create pair commit", err)
+		if err := mng.PairCommit.Create(newCommit); err != nil {
+			return response.Error(true, "Unable to create new pair commit", err)
 		}
 
 		// * Sleep
@@ -116,7 +117,7 @@ func CommitPostHandler(c *fiber.Ctx) error {
 		pairCommit = new(model.PairCommit)
 		if err := mng.PairCommit.First(
 			bson.M{
-				"pairedWith": newPairCommit.ID,
+				"pairedWith": newCommit.ID,
 			},
 			pairCommit,
 		); errors.Is(err, mongo.ErrNoDocuments) {
@@ -144,6 +145,18 @@ func CommitPostHandler(c *fiber.Ctx) error {
 			ForwardLink: forwardLink,
 			PairedWith:  pairedWith,
 		}))
+	}
+
+	// * Create new pair commit
+	newCommit.PairedWith = pairCommit.ID
+	if err := mng.PairCommit.Create(newCommit); err != nil {
+		return response.Error(true, "Unable to create new pair commit", err)
+	}
+
+	// * Update pair commit
+	pairCommit.PairedWith = newCommit.ID
+	if err := mng.PairCommit.Update(pairCommit); err != nil {
+		return response.Error(true, "Unable to update pair commit", err)
 	}
 
 	// * Pair commit
