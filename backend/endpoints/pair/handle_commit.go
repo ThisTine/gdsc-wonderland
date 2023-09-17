@@ -64,10 +64,10 @@ func CommitPostHandler(c *fiber.Ctx) error {
 		}
 
 		// * Response
-		diiference := time.Now().Sub(*duplicateCommit.CreatedAt)
+		difference := 5*time.Second - time.Now().Sub(*duplicateCommit.CreatedAt)
 
 		// * Sprintf Duplicate commit within 4.12 seconds
-		message := spew.Sprintf("Duplicate commit within %.2f", diiference.Seconds())
+		message := spew.Sprintf("Cool-down %.0f seconds %d ms remaining", difference.Seconds(), difference.Milliseconds()%1000)
 		return response.Error(false, message, nil)
 	}
 
@@ -76,7 +76,7 @@ func CommitPostHandler(c *fiber.Ctx) error {
 	pairCommit := new(model.PairCommit)
 	if err := mng.PairCommit.First(
 		bson.M{
-			"itemNo": body.ItemNo,
+			"itemNo": body.ItemId,
 			"createdAt": bson.M{
 				"$gte": pairThreshold,
 			},
@@ -105,7 +105,7 @@ func CommitPostHandler(c *fiber.Ctx) error {
 	// * Construct new pair commit
 	newCommit := &model.PairCommit{
 		SessionId:  body.SessionId,
-		ItemNo:     body.ItemNo,
+		ItemNo:     body.ItemId,
 		PairedWith: nil,
 	}
 
@@ -140,7 +140,7 @@ func CommitPostHandler(c *fiber.Ctx) error {
 		}
 
 		// * Pair commit
-		forwardLink, pairedWith, err := procedures.Paired(*body.SessionId, *pairCommit.SessionId, *newCommit.ID, *pairCommit.ID)
+		pairedWith, forwardLink, err := procedures.Paired(*body.SessionId, *pairCommit.SessionId, *newCommit.ID, *pairCommit.ID)
 		if err != nil {
 			return err
 		}
@@ -165,7 +165,7 @@ func CommitPostHandler(c *fiber.Ctx) error {
 	}
 
 	// * Pair commit
-	forwardLink, pairedWith, err := procedures.Paired(*body.SessionId, *pairCommit.SessionId, *newCommit.ID, *pairCommit.ID)
+	pairedWith, forwardLink, err := procedures.Paired(*body.SessionId, *pairCommit.SessionId, *newCommit.ID, *pairCommit.ID)
 	if err != nil {
 		return err
 	}

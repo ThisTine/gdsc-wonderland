@@ -31,20 +31,20 @@ func InitialGetHandler(c *fiber.Ctx) error {
 		return response.Error(false, "Unable to validate query", err)
 	}
 
+	// * Generate session hash
+	email, hash, err := procedures.ExtractSessionInfo(*query.SessionNo)
+	if err != nil {
+		return err
+	}
+
 	// * Get session id
 	session := new(model.Session)
 	if err := mng.Session.First(
 		bson.M{
-			model.SessionNo: query.SessionNo,
+			model.SessionEmail: email,
 		},
 		session,
 	); errors.Is(err, mongo.ErrNoDocuments) {
-		// * Generate session hash
-		email, hash, err := procedures.ExtractSessionInfo(*query.SessionNo)
-		if err != nil {
-			return err
-		}
-
 		// * Create new session
 		session = &model.Session{
 			Email:        email,
@@ -82,6 +82,7 @@ func InitialGetHandler(c *fiber.Ctx) error {
 		src += base64.RawStdEncoding.EncodeToString(bytes)
 
 		return &payload.Picture{
+			Id:          p.ID,
 			Src:         &src,
 			Title:       p.Title,
 			Description: p.Description,

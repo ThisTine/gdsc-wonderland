@@ -1,42 +1,40 @@
-import {FC, createContext, useState} from "react";
+import {FC, createContext, useState, useEffect, ReactNode} from "react";
+import axios, {AxiosError} from "axios";
+import {ErrorResponse, SuccessResponse} from "../types/response.ts";
+import {InitialResponse} from "../types/payload.ts";
 
-export const StateContext = createContext({});
+export const GlobalContext = createContext<{ state?: InitialResponse, error?: string }>({});
 
-const getState = () => {
-    const token = Cookies.get("token");
-    if (token) {
-        const decoded = jwtDecode(token);
-        return {
-            avatar: decoded.avatar,
-            email: decoded.email,
-            name: decoded.name,
-            permission:
-                decoded.permission === "admin"
-                    ? 2
-                    : decoded.permission === "staff"
-                        ? 1
-                        : 0,
-        };
-    } else {
-        return {
-            avatar: "",
-            email: "",
-            name: "",
-            permission: 0,
-        };
-    }
-};
+export const GlobalContextProvider: FC<{ children: ReactNode }> = ({children}) => {
+    const [state, setState] = useState<InitialResponse | undefined>(undefined);
+    const [error, setError] = useState<string | undefined>(undefined);
 
-export const StateContextProvider: FC<any> = ({children}) => {
-    const [state, setState] = useState(null);
-
-    const value: any = {
+    const value = {
         state: state,
+        error: error,
     };
 
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get("token");
+        axios.get<SuccessResponse<InitialResponse>>("/wonderland/api/pair/initial", {
+            params: {
+                sessionNo: token,
+            }
+        })
+            .then((res) => {
+                setState(res.data.data);
+            })
+            .catch((err: AxiosError<ErrorResponse>) => {
+                setError(err.response?.data.message || err.message);
+            });
+    }, []);
+
     return (
-        <StateContext.Provider value={value}>
-            {children}
-        </StateContext.Provider>
+        <GlobalContext.Provider value={value}>
+            {
+                children
+            }
+        </GlobalContext.Provider>
     );
 };

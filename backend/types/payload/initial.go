@@ -13,7 +13,8 @@ type InitialResponse struct {
 }
 
 type Picture struct {
-	Src         *string `json:"src"`
-	Title       *string `json:"title"`
-	Description *string `json:"description"`
+	Id          *primitive.ObjectID `json:"id"`
+	Src         *string             `json:"src"`
+	Title       *string             `json:"title"`
+	Description *string             `json:"description"`
 }

@@ -1,13 +1,10 @@
-import {SuccessResponse} from "./response.ts";
-
-export type InitialResponse = SuccessResponse<{
+export type InitialResponse = {
     sessionId: string,
     email: string,
-    matched: boolean,
     pictures: string[],
-}>
+}
 
-export type CommitResponse = SuccessResponse<{
+export type CommitResponse = {
     matched: boolean,
     forwardLink: string,
-}>;
+};

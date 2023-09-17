@@ -14,7 +14,7 @@ type Session struct {
 	MatchedCount *int64  `bson:"matchedCount,omitempty"`
 }
 
-const SessionNo = "no"
+const SessionEmail = "email"
 const SessionHash = "hash"
 const SessionMatchedCount = "matchedCount"
 

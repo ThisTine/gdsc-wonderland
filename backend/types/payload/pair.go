@@ -4,7 +4,7 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type ParingCommit struct {
 	SessionId *primitive.ObjectID `json:"sessionId" validate:"required"`
-	ItemNo    *string             `json:"itemNo" validate:"required"`
+	ItemId    *string             `json:"itemId" validate:"required"`
 }
 
 type ParingCommitResponse struct {

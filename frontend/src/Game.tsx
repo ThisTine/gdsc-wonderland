@@ -7,15 +7,17 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import axios, { AxiosError } from "axios";
-import { useEffect, useLayoutEffect, useState } from "react";
+import {useContext, useEffect, useLayoutEffect, useState} from "react";
 import hacker from "./assets/tine_warning.jpg";
 import seedRandom from "seedrandom";
-import { ErrorResponse, SuccessResponse } from "./types/payload.ts";
+import {GlobalContext} from "./contexts/GlobalState.tsx";
+import {ErrorResponse, SuccessResponse} from "./types/response.ts";
+import {CommitResponse} from "./types/payload.ts";
 
-const commit = async (pic: string, session: string) => {
+const commit = async (picId: string, session: string) => {
   const { data } = await axios.post("/wonderland/api/pair/commit", {
-    sessionNo: session,
-    itemNo: pic,
+    sessionId: session,
+    itemId: picId,
   });
   return data;
 };
@@ -67,19 +69,26 @@ const Loading = ({ pic, hack }: { pic: string; hack: boolean }) => {
   );
 };
 
-export const Game = ({ token, unhash }: { token: string; unhash: string }) => {
-  const [pic, setPic] = useState<string>("");
+export const Game = () => {
+  const { state } = useContext(GlobalContext);
+  const [pic, setPic] = useState<any>("");
   const [timeOutLimit, setTimeOutLimit] = useState<number>(0);
   const [Loadtime, setLoadtime] = useState<string>("");
   const [YouareHacker, setYouareHacker] = useState<number>(0);
   const toast = useToast();
-  const rnd = seedRandom(token, { entropy: true });
+  const rnd = seedRandom(state!.sessionId, { entropy: true });
+
+  useLayoutEffect(() => {
+    setPic(state!.pictures[Math.floor(rnd() * state!.pictures.length)]);
+  }, []);
+
   useLayoutEffect(() => {
     const timer = setInterval(() => {
-      setPic(pictures[Math.floor(rnd() * pictures.length)]);
+      setPic(state!.pictures[Math.floor(rnd() * state!.pictures.length)]);
     }, (Math.random() * 0.5 + 0.5) * 1000);
     return () => clearInterval(timer);
   }, [rnd]);
+
   useEffect(() => {
     if (timeOutLimit) {
       setTimeout(() => {
@@ -89,9 +98,9 @@ export const Game = ({ token, unhash }: { token: string; unhash: string }) => {
   }, [timeOutLimit]);
 
   const onClick = () => {
-    setLoadtime(pic!);
-    commit(pictures.indexOf(pic).toString(), unhash)
-      .then((res: SuccessResponse) => {
+    setLoadtime(pic.src);
+    commit(pic.id, state!.sessionId)
+      .then((res: SuccessResponse<CommitResponse>) => {
         if (res.data.matched) {
           window.location.replace(res.data.forwardLink);
         } else {
@@ -128,7 +137,7 @@ export const Game = ({ token, unhash }: { token: string; unhash: string }) => {
           ) : YouareHacker ? (
             <Loading pic={Loadtime} hack={true} />
           ) : (
-            <GameButton onClick={onClick} pic={pic} />
+            <GameButton onClick={onClick} pic={pic.src || pic} />
           )}
         </VStack>
       </Center>
