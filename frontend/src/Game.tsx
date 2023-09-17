@@ -95,7 +95,7 @@ export const Game = ({ token, unhash }: { token: string; unhash: string }) => {
   useLayoutEffect(() => {
     const timer = setInterval(() => {
       setPic(pictures[Math.floor(rnd() * pictures.length)]);
-    }, 200);
+    }, 1000);
     return () => clearInterval(timer);
   }, [rnd]);
   useEffect(() => {
