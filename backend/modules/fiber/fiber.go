@@ -19,7 +19,7 @@ func Init() {
 
 	// * Register root endpoint
 	app.All("/", func(c *fiber.Ctx) error {
-		return c.JSON(response.Info("DENSO_MAP_ROOT_v1"))
+		return c.JSON(response.Info("GDSC_WONDERLAND"))
 	})
 
 	// * Register API endpoints
