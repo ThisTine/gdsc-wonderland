@@ -67,7 +67,7 @@ func CommitPostHandler(c *fiber.Ctx) error {
 	}
 
 	// * Check for existing pair
-	pairThreshold := time.Now().Add(-200 * time.Millisecond)
+	pairThreshold := time.Now().Add(-1 * time.Second)
 	pairCommit := new(model.PairCommit)
 	if err := mng.PairCommit.First(
 		bson.M{
@@ -104,7 +104,7 @@ func CommitPostHandler(c *fiber.Ctx) error {
 		}
 
 		// * Sleep
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(1 * time.Second)
 
 		// * Check for paired with
 		pairCommit = new(model.PairCommit)
