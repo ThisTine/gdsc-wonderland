@@ -3,7 +3,7 @@ package endpoints
 import (
 	"github.com/gofiber/fiber/v2"
 
-	pairEndpoint "backend/endpoints/pair"
+	"backend/endpoints/pair"
 )
 
 func Init(router fiber.Router) {

@@ -6,12 +6,12 @@ import (
 	mod "backend/modules"
 	"backend/modules/config"
 	"backend/modules/fiber"
-	"backend/modules/mongo"
+	"backend/modules/mng"
 )
 
 func main() {
 	config.Init()
-	mongo.Init()
+	mng.Init()
 	fiber.Init()
 
 	// * Startup

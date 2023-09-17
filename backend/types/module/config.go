@@ -9,6 +9,5 @@ type Config struct {
 	Cors        []string `yaml:"cors" validate:"required"`
 	MongoUrl    string   `yaml:"mongo_url" validate:"required"`
 	MongoDbName string   `yaml:"mongo_db_name" validate:"required"`
-	Secret      string   `yaml:"secret" validate:"required"`
-	Mock        bool     `yaml:"mock" validate:"omitempty"`
+	ForwardLink string   `yaml:"forward_link" validate:"required"`
 }
