@@ -8,4 +8,5 @@ type ParingCommit struct {
 type ParingCommitResponse struct {
 	Matched     *bool   `json:"matched"`
 	ForwardLink *string `json:"forwardLink"`
+	PairedWith  *string `json:"pairedWith"`
 }

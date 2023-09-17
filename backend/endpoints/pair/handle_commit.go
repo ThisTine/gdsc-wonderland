@@ -72,6 +72,10 @@ func CommitPostHandler(c *fiber.Ctx) error {
 	if err := mng.PairCommit.First(
 		bson.M{
 			"itemNo": body.ItemNo,
+			"pairedWith": bson.M{
+				"$exists": true,
+				"$ne":     nil,
+			},
 			"createdAt": bson.M{
 				"$gte": pairThreshold,
 			},
@@ -91,44 +95,60 @@ func CommitPostHandler(c *fiber.Ctx) error {
 		// # Case of not found matching pair
 		// * Construct adding pair commit
 		newPairCommit := &model.PairCommit{
-			SessionNo: body.SessionNo,
-			ItemNo:    body.ItemNo,
+			SessionNo:  body.SessionNo,
+			ItemNo:     body.ItemNo,
+			PairedWith: nil,
 		}
 		if err := mng.PairCommit.Create(newPairCommit); err != nil {
 			return response.Error(true, "Unable to create pair commit", err)
 		}
 
-		// * Response
+		// * Sleep
+		time.Sleep(200 * time.Millisecond)
+
+		// * Check for paired with
+		pairCommit = new(model.PairCommit)
+		if err := mng.PairCommit.First(
+			bson.M{
+				"pairedWith": newPairCommit.ID,
+			},
+			pairCommit,
+		); errors.Is(err, mongo.ErrNoDocuments) {
+			pairCommit = nil
+		} else if err != nil {
+			return response.Error(true, "Unable to find pair commit", err)
+		}
+
+		if pairCommit == nil {
+			return c.JSON(response.Info(&payload.ParingCommitResponse{
+				Matched:     value.FalsePtr,
+				ForwardLink: nil,
+				PairedWith:  nil,
+			}))
+		}
+
+		// * Pair commit
+		forwardLink, pairedWith, err := procedures.Paired(*body.SessionNo, *pairCommit.SessionNo)
+		if err != nil {
+			return err
+		}
+
 		return c.JSON(response.Info(&payload.ParingCommitResponse{
-			Matched:     value.FalsePtr,
-			ForwardLink: nil,
+			Matched:     value.TruePtr,
+			ForwardLink: forwardLink,
+			PairedWith:  pairedWith,
 		}))
 	}
 
-	// * Generate session hash
-	sessionHash, err := procedures.GenerateSessionHash(body.SessionNo)
+	// * Pair commit
+	forwardLink, pairedWith, err := procedures.Paired(*body.SessionNo, *pairCommit.SessionNo)
 	if err != nil {
 		return err
 	}
 
-	// * Generate forward link
-	forwardLink := procedures.GenerateForwardLink(sessionHash)
-
-	// * Log successful pair
-	newPairLog := &model.PairLog{
-		SessionNo: body.SessionNo,
-		Action:    value.Ptr("pair"),
-		Attribute: map[string]any{
-			"hash": sessionHash,
-		},
-	}
-	if err := mng.PairLog.Create(newPairLog); err != nil {
-		return response.Error(true, "Unable to create pair log", err)
-	}
-
-	// * Response
 	return c.JSON(response.Info(&payload.ParingCommitResponse{
 		Matched:     value.TruePtr,
 		ForwardLink: forwardLink,
+		PairedWith:  pairedWith,
 	}))
 }
