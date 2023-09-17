@@ -1,0 +1,6 @@
+# IDE Configuration
+.idea
+.vscode
+
+# Finder Attribut
+.DS_Store
