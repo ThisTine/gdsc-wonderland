@@ -9,7 +9,7 @@ import (
 
 type PairCommit struct {
 	mh.ModelBase `bson:"_,inline"`
-	SessionId    *string `bson:"sessionId,omitempty"`
+	SessionNo    *string `bson:"sessionNo,omitempty"`
 	ItemNo       *string `bson:"itemNo,omitempty"`
 }
 

@@ -27,17 +27,17 @@ func CommitPostHandler(c *fiber.Ctx) error {
 
 	// * Validate body
 	if err := text.Validator.Struct(body); err != nil {
-		return response.Error(true, "Unable to validate body", err)
+		return err
 	}
 
 	// * Query duplicate commit
-	threshold := time.Now().Add(-5 * time.Second)
+	duplicateThreshold := time.Now().Add(-5 * time.Second)
 	duplicateCommit := new(model.PairCommit)
 	if err := mng.PairCommit.First(
 		bson.M{
 			"sessionNo": body.SessionNo,
 			"createdAt": bson.M{
-				"$gte": threshold,
+				"$gte": duplicateThreshold,
 			},
 		},
 		duplicateCommit,
@@ -67,10 +67,14 @@ func CommitPostHandler(c *fiber.Ctx) error {
 	}
 
 	// * Check for existing pair
+	pairThreshold := time.Now().Add(-200 * time.Millisecond)
 	pairCommit := new(model.PairCommit)
 	if err := mng.PairCommit.First(
 		bson.M{
 			"itemNo": body.ItemNo,
+			"createdAt": bson.M{
+				"$gte": pairThreshold,
+			},
 		},
 		pairCommit,
 		&options.FindOneOptions{
@@ -83,13 +87,12 @@ func CommitPostHandler(c *fiber.Ctx) error {
 		return response.Error(true, "Unable to find pair commit", err)
 	}
 
-	if pairCommit == nil || (pairCommit != nil && pairCommit.CreatedAt.Before(threshold)) {
+	if pairCommit == nil {
 		// # Case of not found matching pair
-
 		// * Construct adding pair commit
 		newPairCommit := &model.PairCommit{
-			SessionId: body.SessionNo,
-			ItemNo:    nil,
+			SessionNo: body.SessionNo,
+			ItemNo:    body.ItemNo,
 		}
 		if err := mng.PairCommit.Create(newPairCommit); err != nil {
 			return response.Error(true, "Unable to create pair commit", err)
@@ -102,10 +105,25 @@ func CommitPostHandler(c *fiber.Ctx) error {
 		}))
 	}
 
-	// * Generate forward link
-	forwardLink, err := procedures.GenerateForwardLink(body.SessionNo)
+	// * Generate session hash
+	sessionHash, err := procedures.GenerateSessionHash(body.SessionNo)
 	if err != nil {
 		return err
+	}
+
+	// * Generate forward link
+	forwardLink := procedures.GenerateForwardLink(sessionHash)
+
+	// * Log successful pair
+	newPairLog := &model.PairLog{
+		SessionNo: body.SessionNo,
+		Action:    value.Ptr("pair"),
+		Attribute: map[string]any{
+			"hash": sessionHash,
+		},
+	}
+	if err := mng.PairLog.Create(newPairLog); err != nil {
+		return response.Error(true, "Unable to create pair log", err)
 	}
 
 	// * Response

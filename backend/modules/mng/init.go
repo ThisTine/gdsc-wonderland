@@ -30,7 +30,7 @@ func Init() {
 		&mgm.Config{
 			CtxTimeout: 5 * time.Second,
 		},
-		mod.Conf.MongoDbName,
+		mod.Conf.MongoName,
 		options.Client().ApplyURI(mod.Conf.MongoUrl).SetMonitor(monitor),
 	); err != nil {
 		logrus.WithError(err).Fatal("UNABLE TO CONFIGURATION MGM")

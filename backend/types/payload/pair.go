@@ -1,8 +1,8 @@
 package payload
 
 type ParingCommit struct {
-	SessionNo *string `json:"sessionNo"`
-	ItemNo    *string `json:"itemNo"`
+	SessionNo *string `json:"sessionNo" validate:"required"`
+	ItemNo    *string `json:"itemNo" validate:"required"`
 }
 
 type ParingCommitResponse struct {

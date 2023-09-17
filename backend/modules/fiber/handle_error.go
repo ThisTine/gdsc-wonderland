@@ -24,7 +24,7 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 
 	// Case of ErrorInstance
 	var respErr *response.ErrorInstance
-	if errors.As(err, &fiberErr) {
+	if errors.As(err, &respErr) {
 		if respErr.Err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(&response.ErrorResponse{
 				Success: false,
