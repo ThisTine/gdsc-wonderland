@@ -13,7 +13,6 @@ import (
 	"backend/modules/mng"
 	"backend/types/model"
 	"backend/types/response"
-	"backend/utils/value"
 )
 
 func GenerateForwardLink(sessionHash string) *string {
@@ -22,17 +21,17 @@ func GenerateForwardLink(sessionHash string) *string {
 	return &forwardLink
 }
 
-func GenerateSessionHash(sessionNo string) (*string, *string, *response.ErrorInstance) {
+func GenerateSessionHash(sessionNo string) (*string, *response.ErrorInstance) {
 	// * Decode base64 sessionNo
 	decoded, err := base64.StdEncoding.DecodeString(sessionNo)
 	if err != nil {
-		return nil, nil, response.Error(true, "Unable to decode session no", err)
+		return nil, response.Error(true, "Unable to decode session no", err)
 	}
 
 	// * Fetch session hash
 	config := new(model.Config)
 	if err := mng.Config.First(bson.M{}, config); err != nil {
-		return nil, nil, response.Error(true, "Unable to fetch config", err)
+		return nil, response.Error(true, "Unable to fetch config", err)
 	}
 
 	// * Generate session hash
@@ -41,5 +40,5 @@ func GenerateSessionHash(sessionNo string) (*string, *string, *response.ErrorIns
 	sha := hex.EncodeToString(h.Sum(nil))
 
 	// * Return session hash
-	return &sha, value.Ptr(string(decoded)), nil
+	return &sha, nil
 }

@@ -1,6 +1,9 @@
 package procedures
 
 import (
+	"encoding/base64"
+	"strings"
+
 	"backend/modules/mng"
 	"backend/types/model"
 	"backend/types/response"
@@ -9,9 +12,15 @@ import (
 
 func Paired(sessionNo string, pairedSessionNo string) (forwardUrl *string, pairedWith *string, e error) {
 	// * Generate session hash
-	sessionHash, decodedSessionNo, err := GenerateSessionHash(sessionNo)
+	sessionHash, errr := GenerateSessionHash(sessionNo)
+	if errr != nil {
+		return nil, nil, errr
+	}
+
+	// * Decode pair base64 sessionNo
+	decoded, err := base64.StdEncoding.DecodeString(pairedSessionNo)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, response.Error(true, "Unable to decode session no", err)
 	}
 
 	// * Generate forward link
@@ -30,5 +39,5 @@ func Paired(sessionNo string, pairedSessionNo string) (forwardUrl *string, paire
 		return nil, nil, response.Error(true, "Unable to create pair log", err)
 	}
 
-	return forwardLink, decodedSessionNo, nil
+	return forwardLink, value.Ptr(strings.TrimSpace(string(decoded))), nil
 }
