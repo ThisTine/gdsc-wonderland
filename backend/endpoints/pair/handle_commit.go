@@ -72,12 +72,18 @@ func CommitPostHandler(c *fiber.Ctx) error {
 	if err := mng.PairCommit.First(
 		bson.M{
 			"itemNo": body.ItemNo,
-			"pairedWith": bson.M{
-				"$exists": true,
-				"$ne":     nil,
-			},
 			"createdAt": bson.M{
 				"$gte": pairThreshold,
+			},
+			"$or": bson.A{
+				bson.M{
+					"pairedWith": nil,
+				},
+				bson.M{
+					"pairedWith": bson.M{
+						"$exists": false,
+					},
+				},
 			},
 		},
 		pairCommit,

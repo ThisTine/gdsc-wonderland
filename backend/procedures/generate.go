@@ -7,6 +7,8 @@ import (
 	"encoding/hex"
 	"strings"
 
+	"go.mongodb.org/mongo-driver/bson"
+
 	"backend/modules"
 	"backend/modules/mng"
 	"backend/types/model"
@@ -29,7 +31,7 @@ func GenerateSessionHash(sessionNo string) (*string, *string, *response.ErrorIns
 
 	// * Fetch session hash
 	config := new(model.Config)
-	if err := mng.Config.First(nil, config); err != nil {
+	if err := mng.Config.First(bson.M{}, config); err != nil {
 		return nil, nil, response.Error(true, "Unable to fetch config", err)
 	}
 

@@ -7,7 +7,7 @@ import (
 	"backend/utils/value"
 )
 
-func Paired(sessionNo string, pairedSessionNo string) (forwardUrl *string, pairedWith *string, err error) {
+func Paired(sessionNo string, pairedSessionNo string) (forwardUrl *string, pairedWith *string, e error) {
 	// * Generate session hash
 	sessionHash, decodedSessionNo, err := GenerateSessionHash(sessionNo)
 	if err != nil {
