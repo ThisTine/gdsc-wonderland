@@ -26,7 +26,7 @@ const pictures = [
 const commit = async (pic: string, session: string) => {
   try {
     var res;
-    const { data, status } = await axios.post("/wonderland/api/pair/commit", {
+    const { data } = await axios.post("/wonderland/api/pair/commit", {
       sessionNo: session,
       itemNo: pic,
     });
@@ -105,20 +105,18 @@ export const Game = ({ token, unhash }: { token: string; unhash: string }) => {
 
   const onClick = () => {
     setLoadtime(pic);
-    const res = commit(pictures.indexOf(pic).toString(), unhash).then(
-      (res: any) => {
-        if (res.success) {
-          if (res.data.matched) {
-            window.location.replace(res.data.forwardLink);
-          } else {
-            setTimeOutLimit(5);
-            setLoadtime("");
-          }
+    commit(pictures.indexOf(pic).toString(), unhash).then((res: any) => {
+      if (res.success) {
+        if (res.data.matched) {
+          window.location.replace(res.data.forwardLink);
         } else {
-          setYouareHacker(5);
+          setTimeOutLimit(5);
+          setLoadtime("");
         }
+      } else {
+        setYouareHacker(5);
       }
-    );
+    });
   };
   return (
     <Box pt={5}>
